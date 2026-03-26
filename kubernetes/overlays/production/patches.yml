@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+        - name: frontend
+          image: demo.goharbor.io/luftschmaus/luftschmaus-frontend:14-e6735ba8 # {"$imagepolicy": "flux-system:frontend-production"}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+        - name: backend
+          image: demo.goharbor.io/luftschmaus/luftschmaus-backend:14-e6735ba8 # {"$imagepolicy": "flux-system:backend-production"}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  type: NodePort
+  ports:
+    - port: 80
+      targetPort: 8080
+      nodePort: 30082

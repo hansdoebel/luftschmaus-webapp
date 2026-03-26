@@ -1,0 +1,10 @@
+node_modules
+**/node_modules
+**/results.xml
+**/*.env
+**/*.env.*
+**/dist
+**/test
+.git
+.woodpecker
+k8s

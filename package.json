@@ -1,0 +1,16 @@
+{
+  "name": "luftschmaus-webapp",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": ["backend", "frontend"],
+  "scripts": {
+    "lint": "eslint .",
+    "test": "bun run --filter '*' test"
+  },
+  "devDependencies": {
+    "eslint": "^10.1.0",
+    "@eslint/js": "^10.0.1",
+    "globals": "^17.4.0"
+  }
+}

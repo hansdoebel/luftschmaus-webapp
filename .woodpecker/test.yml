@@ -1,0 +1,44 @@
+clone:
+  - name: clone
+    image: woodpeckerci/plugin-git
+    settings:
+      remote: http://forgejo:3000/${CI_REPO}
+      ref: ${CI_COMMIT_REF}
+
+when:
+  - event: [push, manual]
+    branch: [main, develop]
+
+steps:
+  - name: install
+    image: oven/bun:alpine
+    commands:
+      - bun install --frozen-lockfile
+
+  - name: lint
+    image: oven/bun:alpine
+    depends_on: [install]
+    commands:
+      - bun run lint
+
+  - name: test-frontend
+    image: oven/bun:alpine
+    depends_on: [install]
+    commands:
+      - bun run --filter luftschmaus-frontend test
+
+  - name: test-backend
+    image: oven/bun:alpine
+    depends_on: [install]
+    environment:
+      DATABASE_URL: postgresql://test:test@postgres:5432/testdb
+    commands:
+      - bun run --filter luftschmaus-backend test
+
+services:
+  - name: postgres
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: testdb

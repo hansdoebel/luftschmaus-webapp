@@ -1,0 +1,40 @@
+depends_on:
+  - test
+
+clone:
+  - name: clone
+    image: woodpeckerci/plugin-git
+    settings:
+      remote: http://forgejo:3000/${CI_REPO}
+      ref: ${CI_COMMIT_REF}
+
+when:
+  - event: [push, manual]
+    branch: [main, develop]
+
+steps:
+  - name: build-and-push-backend
+    image: plugins/docker
+    settings:
+      registry: demo.goharbor.io
+      repo: demo.goharbor.io/luftschmaus/luftschmaus-backend
+      tags: "${CI_PIPELINE_NUMBER}-${CI_COMMIT_SHA:0:8}"
+      context: .
+      dockerfile: backend/Dockerfile
+      username:
+        from_secret: harbor_username
+      password:
+        from_secret: harbor_password
+
+  - name: build-and-push-frontend
+    image: plugins/docker
+    settings:
+      registry: demo.goharbor.io
+      repo: demo.goharbor.io/luftschmaus/luftschmaus-frontend
+      tags: "${CI_PIPELINE_NUMBER}-${CI_COMMIT_SHA:0:8}"
+      context: .
+      dockerfile: frontend/Dockerfile
+      username:
+        from_secret: harbor_username
+      password:
+        from_secret: harbor_password

@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: luftschmaus-production
+resources:
+  - ../../base
+  - namespace.yml
+patches:
+  - path: patches.yml

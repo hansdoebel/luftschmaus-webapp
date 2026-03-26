@@ -1,0 +1,31 @@
+depends_on:
+  - build
+
+clone:
+  - name: clone
+    image: woodpeckerci/plugin-git
+    settings:
+      remote: http://forgejo:3000/${CI_REPO}
+      ref: ${CI_COMMIT_REF}
+
+when:
+  - event: manual
+    branch: main
+
+steps:
+  - name: promote-to-production
+    image: alpine/git
+    environment:
+      FORGEJO_TOKEN:
+        from_secret: forgejo_token
+    commands:
+      - CURRENT_TAG=$(sed -n 's/.*luftschmaus-frontend:\([^ ]*\).*/\1/p' kubernetes/overlays/staging/patches.yml | head -1)
+      - echo "Promoting $${CURRENT_TAG} to production"
+      - sed -i "s|luftschmaus-frontend:[^ ]*|luftschmaus-frontend:$${CURRENT_TAG}|" kubernetes/overlays/production/patches.yml
+      - sed -i "s|luftschmaus-backend:[^ ]*|luftschmaus-backend:$${CURRENT_TAG}|" kubernetes/overlays/production/patches.yml
+      - git config user.email "woodpecker@luftschmaus.local"
+      - git config user.name "Woodpecker CI"
+      - git remote set-url origin http://woodpecker:$${FORGEJO_TOKEN}@forgejo:3000/${CI_REPO}.git
+      - git add kubernetes/overlays/production/
+      - git commit -m "[ci skip] promote $${CURRENT_TAG} to production"
+      - git push origin HEAD:main
